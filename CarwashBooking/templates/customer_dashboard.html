@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Section Title */
+.section-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: #0d6efd;
+    text-align: center;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Info Cards */
+.info-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 25px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    transition: all .3s ease;
+    border-left: 5px solid #0d6efd;
+    min-height: 180px;
+}
+
+.info-card h5 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0d6efd;
+    margin-bottom: 12px;
+}
+
+.info-card p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Hover Effects */
+.info-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+    border-left: 5px solid #198754; /* green left border on hover */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .info-card {
+        margin-bottom: 15px;
+    }
+}
+
+</style>
+<div class="container mt-4">
+
+  <!-- ✅ Customer Profile Card -->
+  <div class="card shadow-lg p-4 mb-4 position-relative">
+    <h4 class="mb-3 text-primary">👤 My Profile</h4>
+    <div class="d-flex justify-content-center">
+       <div class="d-flex justify-content-end mb-3 me-3">
+    <a href="{% url 'booking_list' %}" class="btn btn-primary">
+        📘 View My Bookings
+    </a>
+
+      </div>
+      <div class="d-flex justify-content-end mb-3">
+          <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+              ⭐ Give Feedback
+          </button>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-4">
+
+
+      <!-- Clickable Profile Image -->
+     <form method="POST" action="{% url 'update_customer_image' request.user.id %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="booking_id" value="{{ booking.id }}">
+
+    <label for="profileImageInput" class="position-relative">
+        {% if profile.profile_image %}
+            <img src="{{ profile.profile_image.url }}" style="width:100px; height:100px;" class="rounded-circle border">
+        {% else %}
+            <img src="{% static 'images/default_profile.png' %}" style="width:100px; height:100px;" class="rounded-circle border">
+        {% endif %}
+        <input id="profileImageInput" type="file" name="profile_image" class="d-none" onchange="this.form.submit()">
+    </label>
+</form>
+
+
+       <!-- Profile card -->
+      <div class="card p-4 shadow-sm">
+        <h5 class="text-success">👤 Profile</h5>
+        <hr>
+        <p><strong>Full Name:</strong> {{ profile.full_name }}</p>
+        <p><strong>Username:</strong> {{ request.user.username }}</p>
+        <p><strong>Email:</strong> {{ request.user.email }}</p>
+        <p><strong>Contact:</strong> {{ profile.contact_number }}</p>
+        <div class="text-end mt-2">
+          <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">✏️ Edit</button>
+          <a class="btn btn-danger btn-sm" href="{% url 'delete_profile' request.user.id %}" onclick="return confirm('Delete profile & account?');">🗑️ Delete</a>
+        </div>
+      </div>
+    </div>
+   
+  </div>
+
+  <!-- ✅ Washers List -->
+  <div class="mb-5">
+    <h4 class="mb-3 text-success">🚗 Available Washers</h4>
+    <div class="row">
+      {% for washer in washers %}
+      <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+          {% if washer.company_image %}
+          <img src="{{ washer.company_image.url }}" class="card-img-top" style="height:180px; object-fit:cover;">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title text-primary">{{ washer.company_name }}</h5>
+            <p class="text-muted small">{{ washer.company_address }}</p>
+            <p class="text-secondary">{{ washer.description|truncatewords:15 }}</p>
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'washer_public_profile' washer.washer.id %}" class="btn btn-outline-info btn-sm">View Profile</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p>No washers available at the moment.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ✅ INFORMATION SECTION -->
+<h3 class="section-title">About Our Service</h3>
+<div class="row">
+  <div class="col-md-4">
+    <div class="info-card">
+      <h5>🚘 How It Works</h5>
+      <p>1️⃣ Choose a washer<br>2️⃣ Schedule your wash<br>3️⃣ Enjoy a spotless vehicle with ease!</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="info-card">
+      <h5>💡 Advantages</h5>
+      <p>✔ Save time & effort<br>✔ Verified washers<br>✔ Affordable pricing<br>✔ Eco-friendly cleaning</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="info-card">
+      <h5>🔧 Services Offered</h5>
+      <p>🚗 Exterior Wash<br>🧽 Interior Detailing<br>🛞 Tire Cleaning<br>🌿 Eco Wash Options</p>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'edit_customer_profile' request.user.id %}">
+        {% csrf_token %}
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title">Edit Profile</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input name="full_name" class="form-control" value="{{ profile.full_name }}" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input name="username" class="form-control" value="{{ request.user.username }}" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" value="{{ request.user.email }}" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Contact Number</label>
+            <input name="contact_number" class="form-control" value="{{ profile.contact_number }}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">New Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Leave blank to keep current password">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-warning" type="submit">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <form method="POST" action="{% url 'submit_feedback' %}">
+        {% csrf_token %}
+        <input type="hidden" name="booking_id" value="{{ booking.id }}">
+
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title">Give Feedback</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <!-- Company Dropdown -->
+          <div class="mb-3">
+            <label class="form-label">Select Company</label>
+            <select name="washer" class="form-control" required>
+              <option value="">-- Select Company --</option>
+              {% for w in washers %}
+                <option value="{{ w.id }}">{{ w.company_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Star Rating -->
+          <div class="mb-3">
+            <label class="form-label">Star Rating</label>
+            <select name="rating" class="form-control" required>
+              <option value="5">⭐ ⭐ ⭐ ⭐ ⭐ (5)</option>
+              <option value="4">⭐ ⭐ ⭐ ⭐ (4)</option>
+              <option value="3">⭐ ⭐ ⭐ (3)</option>
+              <option value="2">⭐ ⭐ (2)</option>
+              <option value="1">⭐ (1)</option>
+            </select>
+          </div>
+
+          <!-- Feedback Description -->
+          <div class="mb-3">
+            <label class="form-label">Feedback</label>
+            <textarea name="message" class="form-control" rows="3" required></textarea>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Submit Feedback</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+ 

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="text-primary mb-4">Admin Dashboard</h2>
+
+    <div class="row">
+
+        <!-- BOOKINGS -->
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h5 class="text-secondary">All Bookings</h5>
+                <p>View every booking made by customers.</p>
+                <a href="{% url 'admin_bookings_view' %}" class="btn btn-primary">View</a>
+            </div>
+        </div>
+
+        <!-- CUSTOMERS -->
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h5 class="text-secondary">All Customers</h5>
+                <p>Manage and view all customers registered.</p>
+                <a href="{% url 'admin_customerlist_view' %}" class="btn btn-success">View</a>
+            </div>
+        </div>
+
+        <!-- WASHERS -->
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h5 class="text-secondary">All Washers</h5>
+                <p>See all washer profiles and company details.</p>
+                <a href="{% url 'admin_washerslist_view' %}" class="btn btn-warning text-white">View</a>
+            </div>
+        </div>
+
+        <!-- FEEDBACKS -->
+          <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h5 class="text-secondary">All Feedbacks</h5>
+                <p>See all washer profiles and company details.</p>
+<a href="{% url 'admin_all_feedbacks' %}" class="btn btn-warning">View</a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+

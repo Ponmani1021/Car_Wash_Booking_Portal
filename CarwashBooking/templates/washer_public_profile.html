@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="d-flex justify-content-center mb-3">
+    <div class="me-3">
+        <a href="{% url 'customer_dashboard' %}" class="btn btn-outline-secondary">
+            ← Go Back
+        </a>
+    </div>
+    <!-- Book Now Button -->
+    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#bookNowModal">
+      🚗 Book Now
+    </button>
+  </div>
+  <!-- Washer & Company Info Card -->
+  <div class="card shadow-lg mb-4 p-4">
+    <div class="d-flex align-items-center">
+      <!-- Company Image -->
+      {% if company and company.company_image %}
+        <img src="{{ company.company_image.url }}" alt="Company Image" 
+             class="rounded-circle me-4" 
+             style="width: 120px; height: 120px; object-fit: cover;">
+      {% else %}
+        <img src="{% static 'images/default_company.png' %}" alt="No Image"
+             class="rounded-circle me-4"
+             style="width: 120px; height: 120px; object-fit: cover; opacity: 0.7;">
+      {% endif %}
+
+      <!-- Company & Washer Details -->
+      <div>
+        <h3 class="text-primary mb-2">
+          {{ company.company_name|default:"Unnamed Company" }}
+        </h3>
+        <p class="mb-1"><strong>Washer:</strong> {{ washer.username }}</p>
+        <p class="mb-1"><strong>Address:</strong> {{ company.company_address|default:"—" }}</p>
+        <p class="mb-1"><strong>Timings:</strong> {{ company.company_timings|default:"—" }}</p>
+        <p><strong>Description:</strong> {{ company.description|default:"No description available." }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vehicle Pricing Table -->
+  <div class="card shadow p-4">
+    <h4 class="text-success mb-3">💰 Vehicle Washing Prices</h4>
+
+    {% if bookings %}
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped text-center align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Vehicle Type</th>
+              <th>Subtype</th>
+              <th>Cost (₹)</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for booking in bookings %}
+              <tr>
+                <td>{{ booking.get_vehicle_type_display }}</td>
+                <td>{{ booking.subtype|default:"—" }}</td>
+                <td>{{ booking.cost }}</td>
+                <td>{{ booking.updated_at|date:"d M Y, h:i A" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted text-center mt-3">
+        No vehicle pricing details available yet.
+      </p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- BOOK NOW MODAL -->
+<div class="modal fade" id="bookNowModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'create_booking' washer.id %}">
+        {% csrf_token %}
+        <input type="hidden" class="washer-id" value="{{ booking.washer.id }}">
+
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Book Your Wash Slot</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <!-- Vehicle Type -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Vehicle Type</label>
+            <select name="vehicle_type" id="vehicleTypeSelect" class="form-select" required>
+              <option value="">Choose</option>
+              <option value="two_wheeler">Two Wheeler</option>
+              <option value="four_wheeler">Four Wheeler</option>
+              <option value="bus">Bus</option>
+              <option value="heavy_vehicle">Heavy Vehicle</option>
+            </select>
+          </div>
+
+          <!-- Subtype -->
+          <div class="mb-3" id="subtypeDiv" style="display:none;">
+            <label class="form-label fw-bold">Subtype</label>
+            <select name="sub_type" id="subtypeSelect" class="form-select"></select>
+            <div class="text-muted mt-1" id="costDisplay"></div>
+          </div>
+
+          <!-- Pickup and Drop -->
+          <div class="form-check mb-3" id="pickupDiv" style="display:none;">
+            <input type="checkbox" name="pickup_drop" value="yes" id="pickupCheck" class="form-check-input">
+            <label class="form-check-label fw-semibold" for="pickupCheck">
+              Include Pickup & Drop (+₹100)
+            </label>
+          </div>
+
+          <!-- Date and Time -->
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Select Date</label>
+              <input type="date" name="date" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Select Time</label>
+              <input type="time" name="time" class="form-control" required>
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Pickup Address</label>
+            <textarea name="address" rows="3" class="form-control" required placeholder="Enter your address here"></textarea>
+          </div>
+
+          <!-- Total Cost -->
+          <div class="alert alert-info mt-3">
+            <strong>Total Amount:</strong> ₹<span id="totalAmount">0</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+<button type="submit" class="btn btn-primary save-booking-btn">Book Slot</button>
+<div class="subtype-error mt-2"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPT SECTION -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const subtypeOptions = {
+    'two_wheeler': ['Scooter', 'Sports Bike', 'Commuter'],
+    'four_wheeler': ['Hatchback', 'Sedan', 'SUV'],
+    'bus': ['Travel Bus', 'School/College Bus', 'Van'],
+    'heavy_vehicle': ['Truck', 'Lorry', 'Container']
+  };
+
+  const costData = {
+  {% for booking in bookings %}
+    '{{ booking.vehicle_type }}_{{ booking.subtype|lower|slugify }}': {{ booking.cost }},
+  {% endfor %}
+};
+
+  const vehicleSelect = document.getElementById('vehicleTypeSelect');
+  const subtypeSelect = document.getElementById('subtypeSelect');
+  const subtypeDiv = document.getElementById('subtypeDiv');
+  const pickupDiv = document.getElementById('pickupDiv');
+  const pickupCheck = document.getElementById('pickupCheck');
+  const costDisplay = document.getElementById('costDisplay');
+  const totalAmount = document.getElementById('totalAmount');
+
+  let selectedCost = 0;
+
+  vehicleSelect.addEventListener('change', function() {
+    const vehicle = this.value;
+    subtypeSelect.innerHTML = '';
+    costDisplay.textContent = '';
+    totalAmount.textContent = '0';
+    pickupCheck.checked = false;
+
+    if (vehicle && subtypeOptions[vehicle]) {
+      subtypeDiv.style.display = 'block';
+      pickupDiv.style.display = 'block';
+      subtypeOptions[vehicle].forEach(type => {
+        const opt = document.createElement('option');
+        opt.value = type;
+        opt.textContent = type;
+        subtypeSelect.appendChild(opt);
+      });
+    } else {
+      subtypeDiv.style.display = 'none';
+      pickupDiv.style.display = 'none';
+    }
+  });
+
+  subtypeSelect.addEventListener('change', function() {
+    const vehicle = vehicleSelect.value;
+    const subtype = this.value.toLowerCase().replace(/\s+/g, '-');
+    const key = `${vehicle}_${subtype}`;
+    selectedCost = costData[key] || 0;
+    costDisplay.textContent = selectedCost ? `Cost: ₹${selectedCost}` : 'Not available';
+    totalAmount.textContent = selectedCost;
+  });
+
+  pickupCheck.addEventListener('change', function() {
+    let total = selectedCost;
+    if (pickupCheck.checked) total += 100;
+    totalAmount.textContent = total;
+  });
+});
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="text-warning mb-3">All Washers</h3>
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary mb-3">← Back</a>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Washer Name</th>
+                    <th>Contact</th>
+                    <th>Company</th>
+                    <th>Company Address</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for w in washers %}
+                <tr>
+                    <td>{{ w.id }}</td>
+                    <td>{{ w.full_name }}</td>
+                    <td>{{ w.contact_number }}</td>
+                    <td>
+                        {% if w.company %}
+                            {{ w.company.company_name }}
+                        {% else %}
+                            <span class="text-muted">No Company</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ w.company.company_address|default:"—" }}</td>
+
+                    <!-- DELETE BUTTON -->
+                    <td>
+                        <a href="{% url 'delete_washer' w.user.id %}" 
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Are you sure you want to delete this washer account?')">
+                           Remove
+                        </a>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

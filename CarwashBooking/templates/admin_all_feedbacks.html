@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h3 class="text-primary mb-3">📌 All Customer Feedbacks</h3>
+
+    {% if feedbacks %}
+        {% for f in feedbacks %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+
+                <!-- Company Name -->
+                <h5 class="text-success">
+                    {% if f.washer.user.washercompany %}
+                        {{ f.washer.user.washercompany.company_name }}
+                    {% else %}
+                        <span class="text-muted">No Company Name</span>
+                    {% endif %}
+                </h5>
+
+                <hr>
+
+                <!-- Customer Info -->
+                <p><strong>Customer:</strong> {{ f.customer.full_name }}</p>
+
+                <!-- Feedback Description -->
+                <p><strong>Feedback:</strong> {{ f.description }}</p>
+
+                <!-- Star Rating -->
+                <p>
+                    <strong>Rating:</strong>
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= f.stars %}
+                            ⭐
+                        {% else %}
+                            ☆
+                        {% endif %}
+                    {% endfor %}
+                </p>
+
+                <!-- Submitted Date -->
+                <p><strong>Submitted On:</strong> {{ f.created_at|date:"d M Y h:i A" }}</p>
+
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">No feedbacks available.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
+

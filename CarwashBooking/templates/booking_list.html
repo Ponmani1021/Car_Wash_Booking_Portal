@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    /* Address column styling */
+    .address-col {
+        max-width: 220px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    @media (max-width: 768px) {
+        .address-col { max-width: 150px; }
+    }
+
+    @media (max-width: 480px) {
+        .address-col { max-width: 120px; }
+    }
+</style>
+
+<h3 class="mb-4 text-primary">{{ profile.full_name }} Bookings List</h3>
+<div class="mb-3">
+    <a href="{% url 'customer_dashboard' %}" class="btn btn-secondary"> ← Go Back</a>
+</div>
+
+<table class="table table-bordered text-center">
+  <thead class="table-light">
+    <tr>
+      <th>Company Name</th>
+      <th>Vehicle Type</th>
+      <th>Subtype</th>
+      <th>Date & Time</th>
+      <th>Address</th>
+      <th>Cost</th>
+      <th>Status</th>
+      <th>Progress</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for booking in bookings %}
+    <tr>
+
+      <!-- COMPANY -->
+      <td>
+        {% if booking.washer.washercompany %}
+            {{ booking.washer.washercompany.company_name }}
+        {% else %}
+            <span class="text-muted">No Company</span>
+        {% endif %}
+      </td>
+
+      <td>{{ booking.vehicle_type }}</td>
+      <td>{{ booking.subtype }}</td>
+
+      <td>
+        {{ booking.date }}<br>
+        <small class="text-muted">{{ booking.time }}</small>
+      </td>
+
+      <td class="address-col">{{ booking.address }}</td>
+      <td>₹{{ booking.total_cost }}</td>
+
+      <!-- STATUS COLUMN UPDATED -->
+      <td>
+        {% if booking.status == "pending" %}
+            <span class="badge bg-warning text-dark">Pending</span>
+        {% elif booking.status == "accepted" %}
+            <span class="badge bg-info text-dark">Accepted</span>
+        {% elif booking.status == "completed" %}
+            <span class="badge bg-success">Completed</span>
+        {% elif booking.status == "cancelled" %}
+            <span class="badge bg-primary">Cancelled</span>
+        {% elif booking.status == "rejected" %}
+            <span class="badge bg-danger">Rejected</span>
+        {% endif %}
+      </td>
+
+      <!-- PROGRESS BAR -->
+      <td>
+        <div class="progress">
+          {% if booking.status == 'pending' %}
+            <div class="progress-bar bg-warning" style="width: 25%">Pending</div>
+          {% elif booking.status == 'accepted' %}
+            <div class="progress-bar bg-info" style="width: 50%">Accepted</div>
+          {% elif booking.status == 'completed' %}
+            <div class="progress-bar bg-success" style="width: 100%">Completed</div>
+          {% elif booking.status == 'cancelled' or booking.status == 'rejected' %}
+            <div class="progress-bar bg-danger" style="width: 100%">
+              {{ booking.status|title }}
+            </div>
+          {% endif %}
+        </div>
+      </td>
+
+      <!-- ACTIONS UPDATED -->
+      <td>
+        {% if booking.status == "accepted" or booking.status == "completed" %}
+            <button class="btn btn-secondary btn-sm" disabled>Edit</button>
+            <button class="btn btn-secondary btn-sm" disabled>Cancel</button>
+
+        {% elif booking.status == "cancelled" %}
+            <span class="badge bg-primary">Cancelled</span>
+
+        {% elif booking.status == "rejected" %}
+         <span class="badge bg-danger">Rejected</span>
+
+        {% else %}
+            <button class="btn btn-warning btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editBookingModal{{ booking.id }}">
+                Edit
+            </button>
+
+            <a href="{% url 'delete_booking' booking.id %}"
+               class="btn btn-danger btn-sm"
+               onclick="return confirm('Are you sure you want to cancel this booking?');">
+               Cancel
+            </a>
+        {% endif %}
+      </td>
+
+    </tr>
+
+
+
+    <!-- EDIT BOOKING MODAL (UNCHANGED) -->
+    <div class="modal fade" id="editBookingModal{{ booking.id }}" tabindex="-1"
+         aria-labelledby="editBookingModalLabel{{ booking.id }}" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form method="POST" action="{% url 'edit_booking' booking.id %}">
+            {% csrf_token %}
+            <input type="hidden" class="washer-id" value="{{ booking.washer.id }}">
+
+            <div class="modal-header bg-primary text-white">
+              <h5 class="modal-title">Edit Booking - {{ booking.vehicle_type|title }}</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Vehicle Type</label>
+                <select name="vehicle_type" class="form-select booking-vehicle-type" required>
+                    <option value="">Select Vehicle Type</option>
+                    <option value="two_wheeler" {% if booking.vehicle_type == 'two_wheeler' %}selected{% endif %}>Two Wheeler</option>
+                    <option value="four_wheeler" {% if booking.vehicle_type == 'four_wheeler' %}selected{% endif %}>Four Wheeler</option>
+                    <option value="bus" {% if booking.vehicle_type == 'bus' %}selected{% endif %}>Bus</option>
+                    <option value="heavy_vehicle" {% if booking.vehicle_type == 'heavy_vehicle' %}selected{% endif %}>Heavy Vehicle</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Subtype</label>
+                <select name="sub_type" class="form-select booking-subtype" data-existing="{{ booking.subtype }}">
+                    {% if booking.subtype %}
+                    <option selected>{{ booking.subtype }}</option>
+                    {% endif %}
+                </select>
+                <div class="text-danger mt-1 subtype-error"></div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Date</label>
+                <input type="date" name="date" class="form-control" value="{{ booking.date|date:'Y-m-d' }}">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Time</label>
+                <input type="time" name="time" class="form-control" value="{{ booking.time|time:'H:i' }}">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Address</label>
+                <textarea name="address" class="form-control">{{ booking.address }}</textarea>
+              </div>
+
+              <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" name="pickup_drop"
+                       id="pickup{{ booking.id }}" value="yes"
+                       {% if booking.pickup_drop %}checked{% endif %}>
+                <label class="form-check-label" for="pickup{{ booking.id }}">Include Pickup & Drop (+₹100)</label>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Total Cost</label>
+                <input type="text" class="form-control modal-cost-display"
+                       value="₹{{ booking.total_cost }}" disabled>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success save-booking-btn">Save Changes</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+/* ORIGINAL JS — UNCHANGED */
+const subtypeOptions = {
+    'two_wheeler': ['Scooter', 'Sports Bike', 'Commuter'],
+    'four_wheeler': ['Hatchback', 'Sedan', 'SUV'],
+    'bus': ['Travel Bus', 'School/College Bus', 'Van'],
+    'heavy_vehicle': ['Truck', 'Lorry', 'Container']
+};
+
+const costData = {
+    {% for b in bookings %}
+        '{{ b.vehicle_type }}_{{ b.subtype|lower|slugify }}': {{ b.total_cost|floatformat:0 }},
+    {% endfor %}
+};
+
+document.addEventListener("show.bs.modal", function (event) {
+    const modal = event.target;
+    if (!modal.id.startsWith("editBookingModal")) return;
+
+    const vehicleSelect = modal.querySelector(".booking-vehicle-type");
+    const subtypeSelect = modal.querySelector(".booking-subtype");
+    const costDisplay = modal.querySelector(".modal-cost-display");
+    const existingSubtype = subtypeSelect.dataset.existing;
+
+    subtypeSelect.innerHTML = "";
+    const vehicle = vehicleSelect.value;
+    if (!vehicle) return;
+
+    subtypeOptions[vehicle].forEach(sub => {
+        const opt = document.createElement("option");
+        opt.value = sub;
+        opt.textContent = sub;
+        if (sub === existingSubtype) opt.selected = true;
+        subtypeSelect.appendChild(opt);
+    });
+
+    const key = `${vehicle}_${existingSubtype.toLowerCase().replace(/\s+/g, '-')}`;
+    if (costData[key]) {
+        costDisplay.value = `₹${costData[key]}`;
+    }
+});
+
+document.addEventListener("change", function (e) {
+    if (!e.target.classList.contains("booking-vehicle-type")) return;
+
+    const modal = e.target.closest(".modal");
+    const vehicleSelect = modal.querySelector(".booking-vehicle-type");
+    const subtypeSelect = modal.querySelector(".booking-subtype");
+    const costDisplay = modal.querySelector(".modal-cost-display");
+
+    subtypeSelect.innerHTML = "";
+    costDisplay.value = "";
+
+    const vehicle = vehicleSelect.value;
+    if (!vehicle) return;
+
+    subtypeOptions[vehicle].forEach(sub => {
+        const opt = document.createElement("option");
+        opt.value = sub;
+        opt.textContent = sub;
+        subtypeSelect.appendChild(opt);
+    });
+});
+
+document.addEventListener("change", function (e) {
+    if (!e.target.classList.contains("booking-subtype")) return;
+
+    const modal = e.target.closest(".modal");
+    const vehicle = modal.querySelector(".booking-vehicle-type").value;
+    const subtype = modal.querySelector(".booking-subtype").value;
+    const costDisplay = modal.querySelector(".modal-cost-display");
+
+    const key = `${vehicle}_${subtype.toLowerCase().replace(/\s+/g, '-')}`;
+
+    if (costData[key]) {
+        costDisplay.value = `₹${costData[key]}`;
+    } else {
+        costDisplay.value = "Not Available";
+    }
+});
+</script>
+
+{% endblock %}

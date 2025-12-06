@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">📋 Customer Bookings</h2>
+    <a href="{% url 'washer_dashboard' %}" class="btn btn-secondary">← Go back</a>
+  </div>
+
+  {% if bookings %}
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle text-center">
+      <thead class="table-light">
+        <tr>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Vehicle Type</th>
+          <th>Subtype</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Total Cost (₹)</th>
+          <th>Status</th>
+          <th>Progress</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in bookings %}
+        <tr>
+          <td>{{ b.customer.get_full_name|default:b.customer.username }}</td>
+          <td style="max-width:200px; white-space:normal;">{{ b.address }}</td>
+          <td>{{ b.vehicle_type }}</td>
+          <td>{{ b.subtype }}</td>
+          <td>{{ b.date }}</td>
+          <td>{{ b.time }}</td>
+          <td>{{ b.total_cost }}</td>
+
+          <!-- STATUS -->
+          <td>
+            {% if b.status == 'pending' %}
+              <span class="badge bg-warning text-dark">Pending</span>
+            {% elif b.status == 'accepted' %}
+              <span class="badge bg-info text-dark">Accepted</span>
+            {% elif b.status == 'completed' %}
+              <span class="badge bg-success">Completed</span>
+            {% elif b.status == "cancelled" %}
+              <span class="badge bg-primary">Cancelled</span>
+            {% elif b.status == 'rejected' %}
+              <span class="badge bg-danger"
+                  style="cursor:pointer;"
+                  data-bs-toggle="modal"
+                  data-bs-target="#reasonModal{{ b.id }}">
+              Rejected
+            </span>
+          {% endif %}
+          </td>
+
+          <!-- PROGRESS -->
+          <td style="width:180px;">
+            <div class="progress" style="height:18px;">
+              <div class="progress-bar"
+                   style="width: {% if b.status == 'pending' %}0{% elif b.status == 'accepted' %}50{% elif b.status == 'completed' %}100{% else %}0{% endif %}%;">
+                {% if b.status == 'pending' %}0%
+                {% elif b.status == 'accepted' %}50%
+                {% elif b.status == 'completed' %}100%
+                {% elif b.status == 'rejected' %}100%
+                {% else %}0%{% endif %}
+              </div>
+            </div>
+          </td>
+
+
+          <!-- ACTIONS -->
+  <td>
+    <div class="d-flex gap-1 justify-content-center">
+
+      <!-- ACCEPT -->
+      {% if b.status == 'pending' %}
+        <form method="post" action="{% url 'accept_booking' b.id %}">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-success" onclick="return confirm('Accept this booking?');">
+            Accept
+          </button>
+        </form>
+      {% else %}
+        <button class="btn btn-sm btn-outline-success" disabled>Accept</button>
+      {% endif %}
+
+      <!-- COMPLETE -->
+      {% if b.status == 'accepted' %}
+        <form method="post" action="{% url 'complete_booking' b.id %}">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-primary" onclick="return confirm('Mark as completed?');">
+            Completed
+          </button>
+        </form>
+      {% elif b.status == 'completed' %}
+        <button class="btn btn-sm btn-success" disabled>Completed</button>
+      {% else %}
+        <button class="btn btn-sm btn-outline-primary" disabled>Completed</button>
+      {% endif %}
+
+
+      <!-- REJECT BUTTON — opens modal ONLY for washer -->
+     {% if b.status == 'pending' %}
+<form method="post" action="{% url 'reject_booking' b.id %}">
+  {% csrf_token %}
+  <button class="btn btn-sm btn-danger" onclick="return confirm('Reject this booking?');">
+    Reject
+  </button>
+</form>
+{% else %}
+  <button class="btn btn-sm btn-outline-danger" disabled>Reject</button>
+{% endif %}
+
+
+    </div>
+  </td>
+
+        </tr>
+
+
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="card p-4 text-center">
+      <p class="mb-0 text-muted">No bookings yet.</p>
+    </div>
+  {% endif %}
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,398 @@
+{# templates/washer_dashboard.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  .floating-btns .btn { border-radius: 50px; padding: 10px 18px; }
+  .card { border-radius: 12px; }
+  .modal-content { border-radius: 12px; }
+  .company_profile_img{ width: 40px; border-radius: 40%;} */
+</style>
+
+<div class="container mt-5">
+  <h2 class="text-center mb-4">🚗 Washer Dashboard</h2>
+
+  <!-- floating action buttons -->
+  <div class="floating-btns text-center mb-5">
+    <button class="btn btn-success me-3" data-bs-toggle="modal" data-bs-target="#addCompanyModal">🏢 Add/Update Company</button>
+    <button class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#addBookingModal">📘 Add Booking Price</button>
+    <a href="{% url 'washer_view_bookings' %}" class="btn btn-danger me-3">👀 View Bookings</a>
+    <a href="{% url 'washer_feedbacks' %}" class="btn btn-warning">
+    View Feedbacks ⭐
+</a>
+
+  </div>
+
+
+  <!-- Profile card -->
+  <div class="row g-4">
+    <div class="col-md-5">
+      <div class="card p-4 shadow-sm">
+        <h5 class="text-success">👤 Profile</h5>
+        <hr>
+        <p><strong>Full Name:</strong> {{ profile.full_name }}</p>
+        <p><strong>Username:</strong> {{ request.user.username }}</p>
+        <p><strong>Email:</strong> {{ request.user.email }}</p>
+        <p><strong>Contact:</strong> {{ profile.contact_number }}</p>
+        <div class="text-end mt-2">
+          <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">✏️ Edit</button>
+          <a class="btn btn-danger btn-sm" href="{% url 'delete_profile' request.user.id %}" onclick="return confirm('Delete profile & account?');">🗑️ Delete</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Company card --> 
+    <div class="col-md-7">
+      {% if company %}
+      <div class="card p-4 shadow-sm">
+        <h5 class="text-primary">{% if company.company_image %}
+        <img src="{{ company.company_image.url }}" alt="company" class="img-fluid company_profile_img" style="max-width:250px;">
+        {% endif %} Company</h5>
+        <hr>
+        <p><strong>Company Name:</strong> {{ company.company_name }}</p>
+        <p><strong>Address:</strong> {{ company.company_address }}</p>
+        <p><strong>Timings:</strong> {{ company.company_timings }}</p>
+        <p><strong>Description:</strong> {{ company.description }}</p>
+        <div class="text-end">
+          <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editCompanyModal">✏️ Edit</button>
+          <a class="btn btn-danger btn-sm" href="{% url 'delete_company_details' company.id %}" onclick="return confirm('Delete company?');">🗑️ Delete</a>
+        </div>
+      </div>
+      {% else %}
+      <div class="card p-4 text-center shadow-sm">
+        <p class="mb-2 text-muted">No company details yet.</p>
+        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addCompanyModal">➕ Add Company</button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  
+  <!-- bookings table -->
+  <div class="card mt-4 p-3 shadow-sm">
+    <h5 class="text-info">📘 Vehicle Price Details</h5>
+<hr>
+{% if prices %}
+<div class="table-responsive">
+  <table class="table table-bordered align-middle text-center">
+    <thead class="table-light">
+      <tr>
+        <th>Vehicle Type</th>
+        <th>Subtype</th>
+        <th>Cost (₹)</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in prices %}
+      <tr>
+        <td>{{ p.get_vehicle_type_display }}</td>
+        <td>{{ p.subtype }}</td>
+        <td>{{ p.cost }}</td>
+        <td>
+          <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editBookingModal{{ p.id }}">✏️</button>
+          <a class="btn btn-danger btn-sm" href="{% url 'delete_booking_details' p.id %}">🗑️</a>
+        </td>
+      </tr>
+
+      
+        <!-- Edit Booking Price Modal -->
+        <div class="modal fade" id="editBookingModal{{ p.id }}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <form method="POST" action="{% url 'edit_booking_details' p.id %}">
+                {% csrf_token %}
+
+                <div class="modal-header bg-warning text-dark">
+                  <h5 class="modal-title">Edit Booking Price</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                  <div class="mb-3">
+                    <label class="form-label">Vehicle Type</label>
+                    <select name="vehicle_type" class="form-select booking-vehicle-type" data-booking-id="{{ p.id }}">
+                      <option value="two_wheeler" {% if p.vehicle_type == 'two_wheeler' %}selected{% endif %}>Two Wheeler</option>
+                      <option value="four_wheeler" {% if p.vehicle_type == 'four_wheeler' %}selected{% endif %}>Four Wheeler</option>
+                      <option value="bus" {% if p.vehicle_type == 'bus' %}selected{% endif %}>Bus</option>
+                      <option value="heavy_vehicle" {% if p.vehicle_type == 'heavy_vehicle' %}selected{% endif %}>Heavy Vehicle</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Subtype</label>
+                    <select name="subtype" class="form-select booking-subtype" data-existing="{{ p.subtype }}">
+                      <option value="{{ p.subtype }}" selected>{{ p.subtype }}</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Cost (₹)</label>
+                    <input type="number" step="0.01" name="cost" class="form-control" value="{{ p.cost }}">
+                  </div>
+
+                </div>
+
+                <div class="modal-footer">
+                  <button class="btn btn-warning" type="submit">Update</button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-muted">No booking prices set yet.</p>
+{% endif %}
+
+</div>
+
+<!-- Add Company Modal -->
+<div class="modal fade" id="addCompanyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" enctype="multipart/form-data" action="{% url 'add_company_details' %}">
+        {% csrf_token %}
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title">Add / Update Company</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Company Name</label><input name="company_name" class="form-control" required></div>
+          <div class="mb-3"><label class="form-label">Company Image</label><input type="file" name="company_image" class="form-control"></div>
+          <div class="mb-3"><label class="form-label">Address</label><input name="company_address" class="form-control"></div>
+          <div class="mb-3"><label class="form-label">Timings</label><input name="company_timings" class="form-control"></div>
+          <div class="mb-3"><label class="form-label">Description</label><textarea name="description" class="form-control"></textarea></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-success" type="submit">Save Company</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- Edit Company Modal-->
+{% if company %}
+<div class="modal fade" id="editCompanyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" enctype="multipart/form-data" action="{% url 'edit_company_details' company.id %}">
+        {% csrf_token %}
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title">Edit Company</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Company Name</label><input name="company_name" class="form-control" value="{{ company.company_name }}" required></div>
+          <div class="mb-3"><label class="form-label">Company Image</label><input type="file" name="company_image" class="form-control"></div>
+          <div class="mb-3"><label class="form-label">Address</label><input name="company_address" class="form-control" value="{{ company.company_address }}"></div>
+          <div class="mb-3"><label class="form-label">Timings</label><input name="company_timings" class="form-control" value="{{ company.company_timings }}"></div>
+          <div class="mb-3"><label class="form-label">Description</label><textarea name="description" class="form-control">{{ company.description }}</textarea></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-warning" type="submit">Update Company</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Add Booking Modal -->
+<div class="modal fade" id="addBookingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'add_booking_details' %}">
+        {% csrf_token %}
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Add Booking Price</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Vehicle Type</label>
+            <select name="vehicle_type" id="addVehicleType" class="form-select" required>
+              <option value="">Choose</option>
+              <option value="two_wheeler">Two Wheeler</option>
+              <option value="four_wheeler">Four Wheeler</option>
+              <option value="bus">Bus</option>
+              <option value="heavy_vehicle">Heavy Vehicle</option>
+            </select>
+          </div>
+
+          <div class="mb-3" id="addSubtypeDiv" style="display:none;">
+            <label class="form-label">Subtype</label>
+            <select name="subtype" id="addSubtypeSelect" class="form-select"></select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Cost (₹)</label>
+            <input name="cost" type="number" step="0.01" class="form-control" required>
+          </div>
+
+          <div class="form-check mb-2" id="addPickupDiv" style="display:none;">
+            <!-- <input name="include_pickup" type="checkbox" class="form-check-input" id="addIncludePickup"> -->
+            <label class="form-check-label" for="addIncludePickup">ℹ️Pickup and Drop charges include ₹100</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" type="submit">Save Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'edit_profile' request.user.id %}">
+        {% csrf_token %}
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title">Edit Profile</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input name="full_name" class="form-control" value="{{ profile.full_name }}" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input name="username" class="form-control" value="{{ request.user.username }}" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" value="{{ request.user.email }}" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Contact Number</label>
+            <input name="contact_number" class="form-control" value="{{ profile.contact_number }}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">New Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Leave blank to keep current password">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-warning" type="submit">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- JS: subtype options for add + edit modals -->
+<script>
+  (function() {
+    const subtypeOptions = {
+      'two_wheeler': ['Scooter', 'Sports Bike', 'Commuter'],
+      'four_wheeler': ['Hatchback', 'Sedan', 'SUV'],
+      'bus': ['Travel Bus', 'School/College Bus', 'Van'],
+      'heavy_vehicle': ['Truck', 'Lorry', 'Container']
+    };
+
+    // ADD modal elements
+    const addVehicleType = document.getElementById('addVehicleType');
+    const addSubtypeDiv = document.getElementById('addSubtypeDiv');
+    const addSubtypeSelect = document.getElementById('addSubtypeSelect');
+    const addPickupDiv = document.getElementById('addPickupDiv');
+
+    if (addVehicleType) {
+      addVehicleType.addEventListener('change', function() {
+        const v = this.value;
+        if (v && subtypeOptions[v]) {
+          addSubtypeDiv.style.display = 'block';
+          addPickupDiv.style.display = 'block';
+          addSubtypeSelect.innerHTML = '';
+          subtypeOptions[v].forEach(o => {
+            const opt = document.createElement('option');
+            opt.value = o; opt.textContent = o;
+            addSubtypeSelect.appendChild(opt);
+          });
+        } else {
+          addSubtypeDiv.style.display = 'none';
+          addPickupDiv.style.display = 'none';
+        }
+      });
+    }
+
+    // EDIT modals: we have many edit modals. use event delegation: when a modal is shown, populate its subtype select
+    document.addEventListener('show.bs.modal', function (event) {
+      const modal = event.target;
+      // only handle editBooking modals (they have id starting with "editBookingModal")
+      if (!modal.id || !modal.id.startsWith('editBookingModal')) return;
+
+      // find the vehicle select and subtype select inside this modal
+      const vehicleSelect = modal.querySelector('.booking-vehicle-type');
+      const subtypeSelect = modal.querySelector('.booking-subtype');
+      const bookingId = vehicleSelect && vehicleSelect.dataset.bookingId;
+
+      // get current vehicle value and current subtype text from the server-rendered row (we can read value from template)
+      const currentVehicle = vehicleSelect.value;
+      // current subtype: the template rendered b.subtype but the select is empty — we'll set options and set selected to that value
+      const currentSubtype = "{{ '' }}"; // fallback - we will instead read the existing subtype from dataset if provided
+
+      // populate options
+      if (currentVehicle && subtypeOptions[currentVehicle]) {
+        subtypeSelect.innerHTML = '';
+        subtypeOptions[currentVehicle].forEach(optText => {
+          const opt = document.createElement('option');
+          opt.value = optText;
+          opt.textContent = optText;
+          subtypeSelect.appendChild(opt);
+        });
+
+        // set selected option using the row value: the Django template rendered b.subtype as the selected value (we'll check value attribute on subtypeSelect.dataset)
+        // To get the existing subtype for this booking we embed it into the modal select as a data-attr via the template:
+        const existing = subtypeSelect.getAttribute('data-existing') || '';
+        if (existing) {
+          for (let i=0;i<subtypeSelect.options.length;i++) {
+            if (subtypeSelect.options[i].value === existing) {
+              subtypeSelect.options[i].selected = true;
+              break;
+            }
+          }
+        }
+      } else {
+        subtypeSelect.innerHTML = '';
+      }
+    }, true);
+
+    // Also attach change handlers for each edit vehicle select so that when user changes vehicle in modal, subtype select updates.
+    document.querySelectorAll('.booking-vehicle-type').forEach(function(sel) {
+      sel.addEventListener('change', function() {
+        const modal = sel.closest('.modal');
+        const subtypeSel = modal.querySelector('.booking-subtype');
+        const pickDiv = modal.querySelector('#addPickupDiv'); // not present; pickup checkbox exists in modal directly so show/hide not needed here
+        const v = sel.value;
+        subtypeSel.innerHTML = '';
+        if (v && subtypeOptions[v]) {
+          subtypeOptions[v].forEach(optText => {
+            const opt = document.createElement('option');
+            opt.value = optText; opt.textContent = optText;
+            subtypeSel.appendChild(opt);
+          });
+        }
+      });
+    });
+  })();
+</script>
+
+{% endblock %}
