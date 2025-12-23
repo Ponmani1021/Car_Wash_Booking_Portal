@@ -56,9 +56,9 @@
           </td>
 
           <!-- PROGRESS -->
-          <td style="width:180px;">
-            <div class="progress" style="height:18px;">
-              <div class="progress-bar"
+          <!-- <td style="width:180px;">
+            <div class="progress " style="height:18px;">
+              <div class="progress-bar text-center"
                    style="width: {% if b.status == 'pending' %}0{% elif b.status == 'accepted' %}50{% elif b.status == 'completed' %}100{% else %}0{% endif %}%;">
                 {% if b.status == 'pending' %}0%
                 {% elif b.status == 'accepted' %}50%
@@ -67,7 +67,22 @@
                 {% else %}0%{% endif %}
               </div>
             </div>
-          </td>
+          </td> -->
+          <td>
+        <div class="progress fw-bold">
+          {% if b.status == 'pending' %}
+            <div class="progress-bar bg-warning" style="width: 25%">Pending</div>
+          {% elif b.status == 'accepted' %}
+            <div class="progress-bar bg-info" style="width: 50%">Accepted</div>
+          {% elif b.status == 'completed' %}
+            <div class="progress-bar bg-success" style="width: 100%">Completed</div>
+          {% elif b.status == 'cancelled' or b.status == 'rejected' %}
+            <div class="progress-bar bg-danger" style="width: 100%">
+              {{ b.status|title }}
+            </div>
+          {% endif %}
+        </div>
+      </td>
 
 
           <!-- ACTIONS -->
@@ -103,21 +118,51 @@
 
       <!-- REJECT BUTTON — opens modal ONLY for washer -->
      {% if b.status == 'pending' %}
-<form method="post" action="{% url 'reject_booking' b.id %}">
-  {% csrf_token %}
-  <button class="btn btn-sm btn-danger" onclick="return confirm('Reject this booking?');">
+  <button type="button"
+          class="btn btn-danger btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#rejectModal{{ b.id }}">
     Reject
   </button>
-</form>
 {% else %}
   <button class="btn btn-sm btn-outline-danger" disabled>Reject</button>
 {% endif %}
 
 
-    </div>
-  </td>
 
-        </tr>
+      </div>
+    </td>
+
+          </tr>
+
+        <!-- Reject modal -->
+
+        <div class="modal fade" id="rejectModal{{ b.id }}" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'reject_booking' b.id %}">
+        {% csrf_token %}
+
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Reject Booking</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <label class="form-label">Reason for rejection</label>
+          <textarea name="reason" class="form-control" rows="4" required
+            placeholder="Enter reason (e.g. Not available on selected date)">
+          </textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-danger">Reject Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 
 
         {% endfor %}

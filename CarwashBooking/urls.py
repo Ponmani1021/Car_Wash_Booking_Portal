@@ -32,7 +32,6 @@ urlpatterns = [
     # Customer profile
     path('edit_customer_profile/<int:user_id>/', views.edit_customer_profile, name='edit_customer_profile'),
     path('update_customer_image/<int:user_id>/', views.update_customer_image, name='update_customer_image'),
-    # path('edit_customer_profile/', views.edit_customer_profile, name='edit_customer_profile'),
     # Displaying washer profile
     path('washer/<int:washer_id>/', views.washer_public_profile, name='washer_public_profile'),
         
@@ -50,8 +49,8 @@ urlpatterns = [
     path('washer/bookings/complete/<int:id>/', views.complete_booking, name='complete_booking'),
 
 
-     path('customer/<int:id>/bookings/', views.customer_bookings, name='customer_bookings'),
-     path('portal-admin/dashboard/', views.admin_dashboard, name="admin_dashboard"),
+    path('customer/<int:id>/bookings/', views.customer_bookings, name='customer_bookings'),
+    path('portal-admin/dashboard/', views.admin_dashboard, name="admin_dashboard"),
     path('portal-admin/bookings/', views.admin_bookings_view, name="admin_bookings_view"),
     path('portal-admin/customers/', views.admin_customerlist_view, name="admin_customerlist_view"),
     path('portal-admin/washers/', views.admin_washerslist_view, name="admin_washerslist_view"),

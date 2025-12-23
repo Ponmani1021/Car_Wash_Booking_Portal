@@ -590,16 +590,37 @@ def accept_booking(request, id):
     return redirect('washer_view_bookings')
 
 
+# @login_required
+# def reject_booking(request, booking_id):
+#     booking = get_object_or_404(Booking, id=booking_id)
+#     if booking.washer != request.user:
+#         messages.error(request, "You are not allowed to reject this booking.")
+#         return redirect("washer_view_bookings")
+#     booking.status = "rejected"
+#     booking.save()
+#     messages.success(request, "Booking has been rejected.")
+#     return redirect("washer_view_bookings")
+
 @login_required
 def reject_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
+
     if booking.washer != request.user:
         messages.error(request, "You are not allowed to reject this booking.")
         return redirect("washer_view_bookings")
-    booking.status = "rejected"
-    booking.save()
-    messages.success(request, "Booking has been rejected.")
+
+    if request.method == "POST":
+        reason = request.POST.get("reason", "").strip()
+
+        booking.status = "rejected"
+        booking.rejection_reason = reason
+        booking.save()
+
+        messages.success(request, "Booking rejected with reason.")
+        return redirect("washer_view_bookings")
+
     return redirect("washer_view_bookings")
+
 
 
 @login_required
