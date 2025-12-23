@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 04, 2025 at 08:43 AM
+-- Generation Time: Dec 20, 2025 at 10:23 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `carwashportal_db`
+-- Database: `carwashbooking_portal_db`
 --
 
 -- --------------------------------------------------------
@@ -152,11 +152,11 @@ CREATE TABLE `auth_user` (
 --
 
 INSERT INTO `auth_user` (`id`, `password`, `last_login`, `is_superuser`, `username`, `first_name`, `last_name`, `email`, `is_staff`, `is_active`, `date_joined`) VALUES
-(1, 'pbkdf2_sha256$600000$d59KRpC2o39Fi6IfRRfqNP$zt662POzovzfIbWILEQqby6giD4C5l0PDLSlSz3TjIc=', '2025-12-04 07:30:05.378045', 0, 'admin', '', '', '', 0, 1, '2025-12-04 07:06:17.653960'),
-(2, 'pbkdf2_sha256$600000$DQpfsQnuW4GGJZWmPUW3dd$uKoToiNfgShrvEm6pu8bqrqfoDBb175gWhHqJ7V4Yfw=', '2025-12-04 07:27:11.519006', 0, 'MITHRA', 'Mithra', '', 'mithra123@gmail.com', 0, 1, '2025-12-04 07:07:11.230786'),
-(3, 'pbkdf2_sha256$600000$pfetiQsh0JkqOE7oVgMiQo$+7DAwngjKnVJCp5HLOObg7XyWwx92pj7skP+lQADrvY=', '2025-12-04 07:29:10.470413', 0, 'VARSHINI', 'varshini', '', 'varshini123@gmail.com', 0, 1, '2025-12-04 07:13:00.681680'),
-(4, 'pbkdf2_sha256$600000$ods7biUEk8tH2sxeSUYvLa$h2zHrjwAi2jzw5G3JSsnjXLB4GyxOkcY32IORpPyoJo=', '2025-12-04 07:23:46.131367', 0, 'KAVI', 'kavi', '', 'kavi123@gmail.com', 0, 1, '2025-12-04 07:17:23.331880'),
-(5, 'pbkdf2_sha256$600000$phdtp3RRMtWnjKZ53731qy$3e9MQsXEAY+XL1JOoT9sxsxLp9EJTsqY5rKtF/lHkIM=', '2025-12-04 07:28:37.323130', 0, 'SUBI', 'subi', '', 'subideepam@gmail.com', 0, 1, '2025-12-04 07:20:31.868740');
+(1, 'pbkdf2_sha256$600000$Ed6lnFSTJkxey6p7uk5l3k$ICNtRMImBCrJ2Ubhnhh7CnMWPkVxBpZFEppJJfR2vtE=', '2025-12-20 08:15:27.272783', 0, 'admin', '', '', '', 0, 1, '2025-12-20 06:50:48.020477'),
+(2, 'pbkdf2_sha256$600000$7XV2DhlNJoek65T9C6d2W0$mkpHN68RdWbvOpobXktlomMN0ANfJw6FLfM8UWmtSoY=', '2025-12-20 08:05:24.208027', 0, 'MITHRA', 'Mithra', '', 'mithra123@gmail.com', 0, 1, '2025-12-20 06:51:46.967561'),
+(3, 'pbkdf2_sha256$600000$ckXEAs4UbeLfhXh2ZY7vtH$TFuoIorTvPfUU4v79XPf3kWpij47RLbWiFwmO/Tja2Q=', '2025-12-20 08:00:34.360456', 0, 'VARSHINI', 'varshini', '', 'varshini123@gmail.com', 0, 1, '2025-12-20 06:53:12.523799'),
+(4, 'pbkdf2_sha256$600000$5Yc8IOTbc9Qr2jLChmmmlb$Qq6xPcO61yNBn3sn3/6viMpgYstirFI5Vn3pIeQIcSU=', '2025-12-20 08:01:06.578450', 0, 'SUBI', 'subi', '', 'subideepam@gmail.com', 0, 1, '2025-12-20 06:59:24.181244'),
+(5, 'pbkdf2_sha256$600000$xafkcRy1cqiGAkl84lY1MR$yWE8Ryr3WwW/I4QQ6uSLU8RRUfryMKHiY6QYCJ2jxT0=', '2025-12-20 08:05:48.929335', 0, 'RAM', 'ram', '', 'ramkumar1223@gmail.com', 0, 1, '2025-12-20 07:44:41.735173');
 
 -- --------------------------------------------------------
 
@@ -214,18 +214,19 @@ CREATE TABLE `carwashbooking_booking` (
   `status` varchar(20) NOT NULL,
   `created_at` datetime(6) NOT NULL,
   `customer_id` int(11) NOT NULL,
-  `washer_id` int(11) NOT NULL
+  `washer_id` int(11) NOT NULL,
+  `rejection_reason` longtext DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `carwashbooking_booking`
 --
 
-INSERT INTO `carwashbooking_booking` (`id`, `vehicle_type`, `subtype`, `cost`, `pickup_drop`, `date`, `time`, `address`, `total_cost`, `status`, `created_at`, `customer_id`, `washer_id`) VALUES
-(1, 'two_wheeler', 'Sports Bike', 200.00, 1, '2025-12-05', '16:00:00.000000', '4/620, vengamedu bus stop, Tiruppur', 300.00, 'cancelled', '2025-12-04 07:18:36.674450', 4, 3),
-(2, 'two_wheeler', 'Scooter', 100.00, 1, '2025-12-06', '17:00:00.000000', 'Vengamedu bus stop, Tirupur', 200.00, 'accepted', '2025-12-04 07:19:52.811004', 4, 3),
-(3, 'bus', 'School/College Bus', 1800.00, 1, '2025-12-14', '16:00:00.000000', 'KHV School , Tiruppu', 1900.00, 'rejected', '2025-12-04 07:25:57.623601', 2, 5),
-(4, 'bus', 'School/College Bus', 1800.00, 1, '2025-12-15', '17:00:00.000000', 'KVH School, poondi, Tiruppur', 1900.00, 'completed', '2025-12-04 07:28:14.984928', 2, 5);
+INSERT INTO `carwashbooking_booking` (`id`, `vehicle_type`, `subtype`, `cost`, `pickup_drop`, `date`, `time`, `address`, `total_cost`, `status`, `created_at`, `customer_id`, `washer_id`, `rejection_reason`) VALUES
+(1, 'bus', 'Travel Bus', 1200.00, 1, '2025-12-21', '01:00:00.000000', 'Vengamedu bus stop, Tirupur', 1300.00, 'accepted', '2025-12-20 07:02:40.717275', 2, 3, NULL),
+(2, 'four_wheeler', 'Hatchback', 900.00, 0, '2025-12-23', '16:30:00.000000', 'gandhi street, Kumar nagar, Tirupur', 900.00, 'accepted', '2025-12-20 07:03:33.092964', 2, 4, NULL),
+(3, 'four_wheeler', 'Hatchback', 900.00, 1, '2025-12-25', '15:00:00.000000', 'Gandhi nagar road, Tirupur', 1000.00, 'completed', '2025-12-20 07:46:36.351328', 5, 4, NULL),
+(4, 'four_wheeler', 'Sedan', 1000.00, 1, '2025-12-29', '13:00:00.000000', 'Angeripalayam main road, Tiruppur ', 1100.00, 'rejected', '2025-12-20 07:47:34.123229', 5, 4, 'The slot your booked is unavailable. So please choose any other slot');
 
 -- --------------------------------------------------------
 
@@ -247,21 +248,23 @@ CREATE TABLE `carwashbooking_bookingcostdetails` (
 --
 
 INSERT INTO `carwashbooking_bookingcostdetails` (`id`, `vehicle_type`, `subtype`, `cost`, `created_at`, `washer_id`) VALUES
-(1, 'two_wheeler', 'Scooter', 100.00, '2025-12-04 07:14:20.133269', 3),
-(2, 'two_wheeler', 'Sports Bike', 200.00, '2025-12-04 07:14:29.005372', 3),
-(3, 'two_wheeler', 'Commuter', 300.00, '2025-12-04 07:14:37.265096', 3),
-(4, 'four_wheeler', 'Hatchback', 500.00, '2025-12-04 07:14:44.385574', 3),
-(5, 'four_wheeler', 'Sedan', 600.00, '2025-12-04 07:14:52.473622', 3),
-(7, 'four_wheeler', 'SUV', 700.00, '2025-12-04 07:15:36.064440', 3),
-(8, 'bus', 'Travel Bus', 1000.00, '2025-12-04 07:15:46.698154', 3),
-(9, 'bus', 'School/College Bus', 1300.00, '2025-12-04 07:15:56.237279', 3),
-(10, 'bus', 'Van', 1800.00, '2025-12-04 07:16:06.990968', 3),
-(11, 'heavy_vehicle', 'Truck', 2300.00, '2025-12-04 07:16:21.739270', 3),
-(12, 'heavy_vehicle', 'Lorry', 2800.00, '2025-12-04 07:16:32.199924', 3),
-(13, 'heavy_vehicle', 'Container', 3700.00, '2025-12-04 07:16:44.854839', 3),
-(14, 'bus', 'Travel Bus', 1500.00, '2025-12-04 07:21:43.724805', 5),
-(15, 'bus', 'School/College Bus', 1800.00, '2025-12-04 07:21:57.899484', 5),
-(16, 'bus', 'Van', 2000.00, '2025-12-04 07:22:08.169698', 5);
+(1, 'two_wheeler', 'Scooter', 100.00, '2025-12-20 06:54:51.848686', 3),
+(3, 'two_wheeler', 'Sports Bike', 300.00, '2025-12-20 06:55:40.922571', 3),
+(4, 'two_wheeler', 'Commuter', 400.00, '2025-12-20 06:55:51.232930', 3),
+(5, 'four_wheeler', 'Hatchback', 600.00, '2025-12-20 06:56:00.461702', 3),
+(6, 'four_wheeler', 'Sedan', 800.00, '2025-12-20 06:56:18.513210', 3),
+(7, 'four_wheeler', 'SUV', 900.00, '2025-12-20 06:56:33.709456', 3),
+(8, 'bus', 'Travel Bus', 1200.00, '2025-12-20 06:56:42.540019', 3),
+(9, 'bus', 'School/College Bus', 1500.00, '2025-12-20 06:56:56.796982', 3),
+(10, 'bus', 'Van', 1500.00, '2025-12-20 06:57:09.819820', 3),
+(11, 'heavy_vehicle', 'Truck', 2000.00, '2025-12-20 06:57:23.672567', 3),
+(12, 'heavy_vehicle', 'Lorry', 2200.00, '2025-12-20 06:57:43.837261', 3),
+(13, 'heavy_vehicle', 'Container', 3000.00, '2025-12-20 06:58:11.402175', 3),
+(14, 'two_wheeler', 'Scooter', 200.00, '2025-12-20 07:00:44.177139', 4),
+(15, 'two_wheeler', 'Sports Bike', 400.00, '2025-12-20 07:00:53.154984', 4),
+(16, 'two_wheeler', 'Commuter', 600.00, '2025-12-20 07:01:04.555938', 4),
+(17, 'four_wheeler', 'Hatchback', 900.00, '2025-12-20 07:01:15.704318', 4),
+(18, 'four_wheeler', 'Sedan', 1000.00, '2025-12-20 07:01:28.034140', 4);
 
 -- --------------------------------------------------------
 
@@ -283,8 +286,8 @@ CREATE TABLE `carwashbooking_customerprofile` (
 --
 
 INSERT INTO `carwashbooking_customerprofile` (`id`, `full_name`, `email`, `contact_number`, `profile_image`, `user_id`) VALUES
-(1, 'Mithra', 'mithra123@gmail.com', '7893214560', 'customer_profiles/doll.jpg', 2),
-(2, 'kavi', 'kavi123@gmail.com', '1593571230', 'customer_profiles/girl2.jpg', 4);
+(1, 'Mithra', 'mithra123@gmail.com', '7893214560', 'customer_profiles/doll_rFhGlj2.jpg', 2),
+(2, 'ram', 'ramkumar1223@gmail.com', '4561237890', 'customer_profiles/boy.jpg', 5);
 
 -- --------------------------------------------------------
 
@@ -307,8 +310,8 @@ CREATE TABLE `carwashbooking_feedback` (
 --
 
 INSERT INTO `carwashbooking_feedback` (`id`, `description`, `stars`, `created_at`, `booking_id`, `customer_id`, `washer_id`) VALUES
-(1, 'Accepted very quick And my vehicle has been picked up safely', 4, '2025-12-04 07:24:35.500577', NULL, 2, 1),
-(2, 'My booking is got rejected', 1, '2025-12-04 07:27:35.920620', NULL, 1, 2);
+(1, 'They Accepted my Booking Fast and Delivered Fast ', 5, '2025-12-20 07:04:13.294850', NULL, 1, 1),
+(2, 'Subi car wash center rejected my booking but Informed the reason.', 3, '2025-12-20 08:00:08.807739', NULL, 2, 2);
 
 -- --------------------------------------------------------
 
@@ -332,9 +335,9 @@ CREATE TABLE `carwashbooking_profile` (
 INSERT INTO `carwashbooking_profile` (`id`, `full_name`, `email`, `contact_number`, `role`, `user_id`) VALUES
 (1, 'Admin', '', '', 'admin', 1),
 (2, 'Mithra', 'mithra123@gmail.com', '7893214560', 'customer', 2),
-(3, 'varshini', 'varshini123@gmail.com', '99448444444', 'washer', 3),
-(4, 'kavi', 'kavi123@gmail.com', '1593571230', 'customer', 4),
-(5, 'subi', 'subideepam@gmail.com', '1234567890', 'washer', 5);
+(3, 'varshini', 'varshini123@gmail.com', '1234577890', 'washer', 3),
+(4, 'subi', 'subideepam@gmail.com', '4561237890', 'washer', 4),
+(5, 'ram', 'ramkumar1223@gmail.com', '4561237890', 'customer', 5);
 
 -- --------------------------------------------------------
 
@@ -382,8 +385,8 @@ CREATE TABLE `carwashbooking_washercompany` (
 --
 
 INSERT INTO `carwashbooking_washercompany` (`id`, `company_name`, `company_address`, `company_timings`, `company_image`, `description`, `washer_id`) VALUES
-(1, 'varshini car wash company', 'chettipalayam, Tiruppur', '10.00 am - 09.00 pm', 'company_images/mush.jpg', 'Very good if you pick us', 3),
-(2, 'subi Car wash ', 'Pudur, Tirupur', '12.00 pm to 12.00am', 'company_images/goa.avif', 'Premium Quality', 5);
+(1, 'varshini car wash company', 'Near Anuparpalayam pudur, Tirupur 641652', '10.00 am - 09.00 pm', 'company_images/valpaarai.webp', 'Trust us! Have a Good Result', 3),
+(2, 'subi Car wash ', 'chettipalayam, Tiruppurs', '12.00 pm to 12.00ams', 'company_images/baga-beach.webp', 'Have a good time reaching us', 4);
 
 -- --------------------------------------------------------
 
@@ -404,8 +407,8 @@ CREATE TABLE `carwashbooking_washerprofile` (
 --
 
 INSERT INTO `carwashbooking_washerprofile` (`id`, `full_name`, `contact_number`, `profile_image`, `user_id`) VALUES
-(1, 'varshini', '99448444444', '', 3),
-(2, 'subi', '1234567890', '', 5);
+(1, 'varshini', '1234577890', '', 3),
+(2, 'subi', '4561237890', '', 4);
 
 -- --------------------------------------------------------
 
@@ -476,26 +479,27 @@ CREATE TABLE `django_migrations` (
 --
 
 INSERT INTO `django_migrations` (`id`, `app`, `name`, `applied`) VALUES
-(1, 'contenttypes', '0001_initial', '2025-12-04 07:05:56.900232'),
-(2, 'auth', '0001_initial', '2025-12-04 07:05:57.068821'),
-(3, 'CarwashBooking', '0001_initial', '2025-12-04 07:05:57.304017'),
-(4, 'CarwashBooking', '0002_alter_bookingcostdetails_washer', '2025-12-04 07:05:57.310467'),
-(5, 'admin', '0001_initial', '2025-12-04 07:05:57.365394'),
-(6, 'admin', '0002_logentry_remove_auto_add', '2025-12-04 07:05:57.375890'),
-(7, 'admin', '0003_logentry_add_action_flag_choices', '2025-12-04 07:05:57.386236'),
-(8, 'contenttypes', '0002_remove_content_type_name', '2025-12-04 07:05:57.418859'),
-(9, 'auth', '0002_alter_permission_name_max_length', '2025-12-04 07:05:57.448692'),
-(10, 'auth', '0003_alter_user_email_max_length', '2025-12-04 07:05:57.462639'),
-(11, 'auth', '0004_alter_user_username_opts', '2025-12-04 07:05:57.474108'),
-(12, 'auth', '0005_alter_user_last_login_null', '2025-12-04 07:05:57.505332'),
-(13, 'auth', '0006_require_contenttypes_0002', '2025-12-04 07:05:57.511310'),
-(14, 'auth', '0007_alter_validators_add_error_messages', '2025-12-04 07:05:57.519268'),
-(15, 'auth', '0008_alter_user_username_max_length', '2025-12-04 07:05:57.532344'),
-(16, 'auth', '0009_alter_user_last_name_max_length', '2025-12-04 07:05:57.544344'),
-(17, 'auth', '0010_alter_group_name_max_length', '2025-12-04 07:05:57.567764'),
-(18, 'auth', '0011_update_proxy_permissions', '2025-12-04 07:05:57.580532'),
-(19, 'auth', '0012_alter_user_first_name_max_length', '2025-12-04 07:05:57.595968'),
-(20, 'sessions', '0001_initial', '2025-12-04 07:05:57.610553');
+(1, 'contenttypes', '0001_initial', '2025-12-20 06:49:57.439214'),
+(2, 'auth', '0001_initial', '2025-12-20 06:49:57.660579'),
+(3, 'CarwashBooking', '0001_initial', '2025-12-20 06:49:58.202322'),
+(4, 'CarwashBooking', '0002_alter_bookingcostdetails_washer', '2025-12-20 06:49:58.213285'),
+(5, 'CarwashBooking', '0003_booking_rejection_reason', '2025-12-20 06:49:58.234797'),
+(6, 'admin', '0001_initial', '2025-12-20 06:49:58.309760'),
+(7, 'admin', '0002_logentry_remove_auto_add', '2025-12-20 06:49:58.321316'),
+(8, 'admin', '0003_logentry_add_action_flag_choices', '2025-12-20 06:49:58.335069'),
+(9, 'contenttypes', '0002_remove_content_type_name', '2025-12-20 06:49:58.383246'),
+(10, 'auth', '0002_alter_permission_name_max_length', '2025-12-20 06:49:58.415794'),
+(11, 'auth', '0003_alter_user_email_max_length', '2025-12-20 06:49:58.429217'),
+(12, 'auth', '0004_alter_user_username_opts', '2025-12-20 06:49:58.441236'),
+(13, 'auth', '0005_alter_user_last_login_null', '2025-12-20 06:49:58.470341'),
+(14, 'auth', '0006_require_contenttypes_0002', '2025-12-20 06:49:58.473094'),
+(15, 'auth', '0007_alter_validators_add_error_messages', '2025-12-20 06:49:58.481236'),
+(16, 'auth', '0008_alter_user_username_max_length', '2025-12-20 06:49:58.494389'),
+(17, 'auth', '0009_alter_user_last_name_max_length', '2025-12-20 06:49:58.511090'),
+(18, 'auth', '0010_alter_group_name_max_length', '2025-12-20 06:49:58.528403'),
+(19, 'auth', '0011_update_proxy_permissions', '2025-12-20 06:49:58.539916'),
+(20, 'auth', '0012_alter_user_first_name_max_length', '2025-12-20 06:49:58.555986'),
+(21, 'sessions', '0001_initial', '2025-12-20 06:49:58.577437');
 
 -- --------------------------------------------------------
 
@@ -508,13 +512,6 @@ CREATE TABLE `django_session` (
   `session_data` longtext NOT NULL,
   `expire_date` datetime(6) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `django_session`
---
-
-INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
-('r68k5d3apmgsucjc7gmr3htu7guzm4go', '.eJxVjMsOwiAQRf-FtSHDU3Dp3m8gAwxSNZCUdmX8d9ukC92ec-59s4DrUsM6aA5TZhcm2OmXRUxParvID2z3zlNvyzxFvif8sIPfeqbX9Wj_DiqOuq0hOSARQUulwZFB7zUabQAjmLOXJBMYU0QshBksOuUsFuWkULgxyz5fxDE3iA:1vR3mv:HwQoWZ7Vv_FjUp5sxDfcbZE8sSjGt5icQMWj2TOpB2A', '2025-12-18 07:30:05.382219');
 
 --
 -- Indexes for dumped tables
@@ -691,7 +688,7 @@ ALTER TABLE `auth_permission`
 -- AUTO_INCREMENT for table `auth_user`
 --
 ALTER TABLE `auth_user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `auth_user_groups`
@@ -721,7 +718,7 @@ ALTER TABLE `carwashbooking_booking`
 -- AUTO_INCREMENT for table `carwashbooking_bookingcostdetails`
 --
 ALTER TABLE `carwashbooking_bookingcostdetails`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `carwashbooking_customerprofile`
@@ -739,7 +736,7 @@ ALTER TABLE `carwashbooking_feedback`
 -- AUTO_INCREMENT for table `carwashbooking_profile`
 --
 ALTER TABLE `carwashbooking_profile`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `carwashbooking_vehiclesubtype`
@@ -763,7 +760,7 @@ ALTER TABLE `carwashbooking_washercompany`
 -- AUTO_INCREMENT for table `carwashbooking_washerprofile`
 --
 ALTER TABLE `carwashbooking_washerprofile`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `django_admin_log`
@@ -781,7 +778,7 @@ ALTER TABLE `django_content_type`
 -- AUTO_INCREMENT for table `django_migrations`
 --
 ALTER TABLE `django_migrations`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- Constraints for dumped tables

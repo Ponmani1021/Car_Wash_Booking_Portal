@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'carwashproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'carwashportal_db',
+        'NAME': 'carwashbooking_portal_db',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',
